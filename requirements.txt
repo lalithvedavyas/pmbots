@@ -8,3 +8,7 @@ pypdf
 python-docx
 pandas
 beautifulsoup4
+lxml
+html5lib
+docx2txt
+openpyxl
