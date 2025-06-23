@@ -1,34 +1,43 @@
-from langchain.document_loaders import (
-    PyPDFLoader, TextLoader, UnstructuredWordDocumentLoader,
-    CSVLoader, UnstructuredExcelLoader, WebBaseLoader
+from langchain_community.document_loaders import (
+    PyPDFLoader,
+    TextLoader,
+    CSVLoader,
+    UnstructuredWordDocumentLoader,
+    UnstructuredURLLoader
 )
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.llms import OpenAI
+from langchain_community.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
 
-def load_documents(file_path, file_type):
+import os
+
+def load_documents(source, file_type):
     if file_type == "pdf":
-        loader = PyPDFLoader(file_path)
+        loader = PyPDFLoader(source)
     elif file_type == "txt":
-        loader = TextLoader(file_path)
-    elif file_type == "docx":
-        loader = UnstructuredWordDocumentLoader(file_path)
+        loader = TextLoader(source)
     elif file_type == "csv":
-        loader = CSVLoader(file_path)
-    elif file_type == "xlsx":
-        loader = UnstructuredExcelLoader(file_path)
+        loader = CSVLoader(source)
+    elif file_type == "docx":
+        loader = UnstructuredWordDocumentLoader(source)
     elif file_type == "url":
-        loader = WebBaseLoader(file_path)
+        loader = UnstructuredURLLoader(urls=[source])
     else:
-        raise ValueError("Unsupported format")
+        raise ValueError("Unsupported file type.")
+    
     return loader.load()
 
 def build_vectorstore(docs):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    texts = text_splitter.split_documents(docs)
+
     embeddings = OpenAIEmbeddings()
-    return Chroma.from_documents(docs, embeddings)
+    vectorstore = FAISS.from_documents(texts, embeddings)
+    return vectorstore
 
 def get_qa_chain(vectorstore):
-    retriever = vectorstore.as_retriever()
-    llm = OpenAI(temperature=0)
-    return RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+    llm = ChatOpenAI(temperature=0)
+    chain = RetrievalQA.from_chain_type(llm=llm, retriever=vectorstore.as_retriever())
+    return chain

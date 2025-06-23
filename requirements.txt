@@ -5,6 +5,4 @@ openai
 faiss-cpu
 pypdf
 pandas
-chromadb==0.4.24
-protobuf==4.25.1
 numpy<2.0.0
