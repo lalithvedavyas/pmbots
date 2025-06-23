@@ -2,14 +2,10 @@ streamlit
 langchain
 langchain-community
 openai
-chromadb
 faiss-cpu
-unstructured
 pypdf
-python-docx
 pandas
-beautifulsoup4
-lxml
-html5lib
-docx2txt
-openpyxl
+
+# Fix for protobuf + chromadb compatibility
+chromadb==0.4.24
+protobuf==4.25.1
