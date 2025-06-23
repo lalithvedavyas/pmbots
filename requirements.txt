@@ -1,0 +1,10 @@
+streamlit
+langchain
+openai
+chromadb
+faiss-cpu
+unstructured
+pypdf
+python-docx
+pandas
+beautifulsoup4
